@@ -3,30 +3,43 @@
 
 import os.path
 import sys
+from itertools import permutations
 
 class Wordlist:
 
-    def __init__(self, path, cluster_count):
+    def __init__(self, path, cluster_count, subdomain_depth):
         self.path = path
         self.cluster_count = cluster_count
-        self.tmp_file = None
+        self.file = None
+        self.subdomain_depth = subdomain_depth
+        self.tmp_file = "./wordlists/tmp.txt"
 
     def check(self):
         return os.path.isfile(self.path)
 
-
-    def load(self):
+    def load(self, calc_result=False):
         if not self.check():
             print("File not found!")
             sys.exit()
 
-        self.tmp_file = open(self.path, 'r')
-        with self.tmp_file as infile:
-            wlist = self.tmp_file.read().split('\n')
-        self.close()
+        self.file = open(self.path, 'r')
+        with self.file as infile:
+            wlists = infile.read().split('\n')
+            infile.close()
 
-        return list(filter(None, wlist))
+        wlists=list(filter(None, wlists))
 
-    def close(self):
-        if not self.tmp_file is None:
-            self.tmp_file.close()
+        if self.subdomain_depth > 1 and calc_result == False:
+
+            print("Temporary data set is being created...", end='\r')
+
+            with open(self.tmp_file, 'w+') as infile:
+                for depth in range(0, self.subdomain_depth):
+                    for p in permutations(wlists, r=depth+1):
+                        infile.write("{0}\n".format('.'.join(p)))
+
+                infile.close()
+
+            return open(self.tmp_file, 'r')
+
+        return wlists
