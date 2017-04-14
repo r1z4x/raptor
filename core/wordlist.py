@@ -33,12 +33,17 @@ class Wordlist:
 
             print("Temporary data set is being created...", end='\r')
 
-            with open(self.tmp_file, 'w+') as infile:
-                for depth in range(0, self.subdomain_depth):
-                    for p in permutations(wlists, r=depth+1):
-                        infile.write("{0}\n".format('.'.join(p)))
+            try:
 
-                infile.close()
+                with open(self.tmp_file, 'w+') as infile:
+                    for depth in range(0, self.subdomain_depth):
+                        for p in permutations(wlists, r=depth+1):
+                            infile.write("{0}\n".format('.'.join(p)))
+
+                    infile.close()
+            except OSError as e:
+                print(e)
+                sys.exit(0)
 
             return open(self.tmp_file, 'r')
 
