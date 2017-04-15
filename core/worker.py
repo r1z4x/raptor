@@ -68,15 +68,6 @@ class Worker:
 		wordlists = []
 		wfile_o = wordlist_info.load()
 
-		if isinstance(wfile_o, list):
-			wordlists = wfile_o
-		else:
-			with wfile_o as wfile:
-				for line in wfile:
-					print(line)
-
-			sys.exit()
-
 		try:
 
 			global data_lists
@@ -91,9 +82,16 @@ class Worker:
 			for idx, root in enumerate(self.roots):
 				data_lists.update({ root : [] })
 				nlists = set(self.get_nameservers(root))
-				for word in wordlists:
-					tasks_count = tasks_count + 1;
-					pool.add_task(self.fetch_dns, root, nlists, word)
+
+				if isinstance(wfile_o, list):
+					for word in wfile_o:
+						tasks_count = tasks_count + 1;
+						pool.add_task(self.fetch_dns, root, nlists, word)
+				else:
+					with wfile_o as wfile:
+						for word in wfile:
+							tasks_count = tasks_count + 1;
+							pool.add_task(self.fetch_dns, root, nlists, word.strip())
 
 			qperc = 0
 			while not pool.tasks.empty():
@@ -107,7 +105,6 @@ class Worker:
 				while not t.is_alive():
 					pass
 				t.stop()
-
 
 
 			end_time = time.time()
