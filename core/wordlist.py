@@ -47,4 +47,8 @@ class Wordlist:
 
             return open(self.tmp_file, 'r')
 
+        elif self.subdomain_depth == 1 and calc_result == False:
+
+            return open(self.tmp_file, 'r')
+
         return wlists

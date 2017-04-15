@@ -65,48 +65,17 @@ class Worker:
 
 		wordlist_info = wordlist.Wordlist(self.wordlist, self.cluster_count, self.subdomain_depth)
 
-		"""tmp_wordlists = [
-			"www",
-			"admin",
-			'phishing',
-			'demo',
-			'user',
-			'neettik',
-			'scanner',
-			'bisiler',
-			'deneme',
-			'hello',
-			'admin2',
-			'mail',
-			'foodsup',
-			'scanner.denemesine'
-		]"""
-
 		wordlists = []
 		wfile_o = wordlist_info.load()
 
 		if isinstance(wfile_o, list):
 			wordlists = wfile_o
 		else:
-			with wordlist_info.load() as wfile:
-				print(sum(bl.count("\n") for bl in self.__blocks(wfile)))
+			with wfile_o as wfile:
+				for line in wfile:
+					print(line)
 
 			sys.exit()
-
-		print(len(wordlists))
-		"""
-		wordlists = []
-		with open('./wordlists/tmp.txt', 'w+') as infile:
-			for depth in range(0, self.subdomain_depth):
-				for p in permutations(wordlist_lists, r=depth+1):
-					infile.write("{0}\n".format('.'.join(p)))
-			infile.close()"""
-
-		sys.exit()
-
-		"""wordlists = []
-		for depth in range(0, self.subdomain_depth):
-			wordlists = wordlists + ['.'.join(p) for p in permutations([ x for x in tmp_wordlists if x is not 'www' ], r=depth+1)]"""
 
 		try:
 
