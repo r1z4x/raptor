@@ -13,6 +13,7 @@ from core.threadpool import ThreadPool
 from tabulate import tabulate
 from collections import namedtuple
 from concurrent.futures import ALL_COMPLETED
+from itertools import islice
 import random
 import threading
 import signal
@@ -48,18 +49,13 @@ class Worker:
 		self.session.lifetime = REQUEST_TIMEOUT_DNS
 		self.session.timeout = REQUEST_TIMEOUT_DNS
 		self.max_threads = max_threads
+		self.max_queues = 500
 		self.cluster_count = cluster_count
-		self._counter = 0
+		self.processed_counter = 0
 		self.wordlist = wordlist
 		self.subdomain_depth = subdomain_depth <= 0 and 1 or subdomain_depth
 
 	DEFAULT_TIMEOUT = 0.1
-
-	def __blocks(files, size=65536):
-		while True:
-			b = files.read(size)
-			if not b: break
-			yield b
 
 	def start(self):
 
@@ -67,6 +63,7 @@ class Worker:
 
 		wordlists = []
 		wfile_o = wordlist_info.load()
+		sfile_o = wordlist_info.load()
 
 		try:
 
@@ -76,36 +73,38 @@ class Worker:
 			start_time = time.time()
 
 			#pool = ThreadPool(self.max_threads)
-			pool = ThreadPool(self.max_threads)
+			#500 => max queue
+			pool = ThreadPool(self.max_threads, self.max_queues)
 
-			tasks_count = 0
+			line_count_size = 0
+
+			with sfile_o as sfile:
+				line_count_size = sum(1 for _ in sfile)
+
 			for idx, root in enumerate(self.roots):
 				data_lists.update({ root : [] })
 				nlists = set(self.get_nameservers(root))
 
-				if isinstance(wfile_o, list):
-					for word in wfile_o:
-						tasks_count = tasks_count + 1;
-						pool.add_task(self.fetch_dns, root, nlists, word)
-				else:
-					with wfile_o as wfile:
-						for word in wfile:
+				tasks_count = 0
+
+				with wfile_o as wfile:
+
+					for word in wfile:
+
+						while True:
+
+							#Wait if the queue is full.
+							if pool.tasks.full():
+								time.sleep(1)
+								continue
+
 							tasks_count = tasks_count + 1;
 							pool.add_task(self.fetch_dns, root, nlists, word.strip())
+							break
 
-			qperc = 0
-			while not pool.tasks.empty():
-				qcurr = 100 * (tasks_count - pool.tasks.qsize()) / tasks_count
-				sys.stdout.write('Scanning {0:.2f}%\r'.format(round(qcurr, 2)))
-				sys.stdout.flush()
-
-				time.sleep(1)
-
-			for t in pool.threads:
-				while not t.is_alive():
-					pass
-				t.stop()
-
+						qcurr = 100 * tasks_count / line_count_size
+						sys.stdout.write('Scanning {0:.2f}%\r'.format(round(qcurr, 2)))
+						sys.stdout.flush()
 
 			end_time = time.time()
 			print("Elapsed time was %g seconds" % (end_time - start_time))
@@ -163,14 +162,21 @@ class Worker:
 			tmp_domain = "{0}.{1}".format(word, root)
 			answer = self.session.query(tmp_domain)
 
+			self.processed_counter = self.processed_counter + 1
+
 			if answer:
-				data_lists[root].append({
+
+				data = {
 					'domain'        : tmp_domain,
 					'dns_check'     : True,
 					'zone_check'    : False,
 					'port_check'    : False,
 					'service_check' : False
-				})
+				}
+
+				data_lists[root].append(data)
+
+				return data
 
 				"""
 				print('[{0}/{1}] {2}'.format(1, 4, tmp_domain), end='\r')
@@ -180,6 +186,8 @@ class Worker:
 				print('[{0}/{1}] {2}'.format(3, 4, tmp_domain), end='\r')
 				time.sleep(30)
 				print('[{0}/{1}] {2}'.format(4, 4, tmp_domain))"""
+
+			return False
 
 		except dns.resolver.NoNameservers:
 			pass

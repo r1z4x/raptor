@@ -19,15 +19,16 @@ class Wordlist:
 
     def load(self, calc_result=False):
         if not self.check():
-            print("File not found!")
-            sys.exit()
+            print('Wordlist Not Found!')
+            sys.exit(0)
 
         self.file = open(self.path, 'r')
-        with self.file as infile:
-            wlists = infile.read().split('\n')
-            infile.close()
 
-        wlists=list(filter(None, wlists))
+        wlists = []
+        with self.file as infile:
+            for f in infile:
+                wlists.append(f.strip())
+            infile.close()
 
         if self.subdomain_depth > 1 and calc_result == False:
 
@@ -49,6 +50,6 @@ class Wordlist:
 
         elif self.subdomain_depth == 1 and calc_result == False:
 
-            return open(self.tmp_file, 'r')
+            return open(self.path, 'r')
 
         return wlists

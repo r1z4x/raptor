@@ -25,15 +25,14 @@ class Worker(threading.Thread):
                     break
 
                 func(*args, **kargs)
+
             except:
                 pass
-            finally:
-                self.tasks.task_done()
 
 class ThreadPool():
-    def __init__(self, num_threads):
+    def __init__(self, num_threads, max_queues):
         self.num_threads = num_threads
-        self.tasks = queue.Queue()
+        self.tasks = queue.Queue(max_queues)
         self.threads = [Worker(self.tasks) for _ in range(self.num_threads)]
 
     def add_task(self, func, *args, **kargs):
