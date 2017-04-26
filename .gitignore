@@ -27,4 +27,6 @@ pip-delete-this-directory.txt
 
 #Raptor Project
 tmp.txt
+tmp*.txt
+dump.rdb
 *.cfg
