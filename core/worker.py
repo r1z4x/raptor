@@ -49,7 +49,8 @@ class Worker:
 		self.session.lifetime = REQUEST_TIMEOUT_DNS
 		self.session.timeout = REQUEST_TIMEOUT_DNS
 		self.max_threads = max_threads
-		self.max_queues = 5000
+		#self.max_queues = 5000
+		self.max_queues = max_threads
 		self.cluster_count = cluster_count
 		self.processed_counter = 0
 		self.wordlist = wordlist
