@@ -103,8 +103,11 @@ class Worker:
 							pool.add_task(self.fetch_dns, root, nlists, word.strip())
 							break
 
+						m, s = divmod(time.time() - start_time, 60)
+						h, m = divmod(m, 60)
+
 						qcurr = 100 * tasks_count / line_count_size
-						sys.stdout.write('Scanning {0:.2f}% [{1:d}/{2:d}]\r'.format(round(qcurr, 2), tasks_count, line_count_size))
+						sys.stdout.write('Scanning {0:.2f}% [{1:d}/{2:d}] Time : {3:02.0f}:{4:02.0f} (Hour/Minute)\r'.format(round(qcurr, 2), tasks_count, line_count_size, h, m))
 						sys.stdout.flush()
 
 			end_time = time.time()
