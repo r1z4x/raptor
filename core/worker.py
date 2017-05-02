@@ -104,7 +104,7 @@ class Worker:
 							break
 
 						qcurr = 100 * tasks_count / line_count_size
-						sys.stdout.write('Scanning {0:.2f}%\r'.format(round(qcurr, 2)))
+						sys.stdout.write('Scanning {0:.2f}% [{1:d}/{2:d}]\r'.format(round(qcurr, 2), tasks_count, line_count_size))
 						sys.stdout.flush()
 
 			end_time = time.time()
