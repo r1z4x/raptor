@@ -17,10 +17,16 @@ class Wordlist:
     def check(self):
         return os.path.isfile(self.path)
 
+    def tmp_check(self):
+        return os.path.isfile(self.tmp_file)
+
     def load(self, calc_result=False):
         if not self.check():
             print('Wordlist Not Found!')
             sys.exit(0)
+
+        if self.tmp_check() and calc_result == False:
+            return open(self.tmp_file, 'r')
 
         self.file = open(self.path, 'r')
 

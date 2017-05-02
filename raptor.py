@@ -27,19 +27,19 @@ from concurrent.futures import ThreadPoolExecutor
 ARGS = argparse.ArgumentParser(description="DNS-based subdomain finder")
 
 ARGS.add_argument(
-    '--max_threads', action='store', type=int, metavar='N',
-    default=100, help='Limit concurrent connections')
+    '-t', '--max_threads', action='store', type=int, metavar='N',
+    default=500, help='Limit concurrent connections')
 
 ARGS.add_argument(
-    '--cluster_count', action='store', type=int, metavar='N',
+    '-c', '--cluster_count', action='store', type=int, metavar='N',
     default=500, help='Limit cluster')
 
 ARGS.add_argument(
-    '--subdomain_depth', action='store', type=int, metavar='N',
+    '-d', '--subdomain_depth', action='store', type=int, metavar='N',
     default=1, help='Subdomain Depth Length')
 
 ARGS.add_argument(
-    '--wordlist', action='store', metavar='N', help='Specific path to wordlist file')
+    '-w', '--wordlist', action='store', metavar='N', help='Specific path to wordlist file')
 
 ARGS.add_argument(
     'roots', nargs='*',
@@ -52,21 +52,22 @@ ARGS.add_argument(
 def print_header():
     print(colors.bcolors.OKBLUE + """
 
-  .--.--.                                  ,---,.
- /  /    '.                   ,---,      ,'  .' |   ,--,                       ,---,
-|  :  /`. /           ,--,  ,---.'|    ,---.'   | ,--.'|          ,---,      ,---.'|              __  ,-.
-;  |  |--`          ,'_ /|  |   | :    |   |   .' |  |,       ,-+-. /  |     |   | :            ,' ,'/ /|
-|  :  ;_       .--. |  | :  :   : :    :   :  :   `--'_      ,--.'|'   |     |   | |    ,---.   '  | |' |
- \  \    `.  ,'_ /| :  . |  :     |,-. :   |  |-, ,' ,'|    |   |  ,"' |   ,--.__| |   /     \  |  |   ,'
-  `----.   \ |  ' | |  . .  |   : '  | |   :  ;/| '  | |    |   | /  | |  /   ,'   |  /    /  | '  :  /
-  __ \  \  | |  | ' |  | |  |   |  / : |   |   .' |  | :    |   | |  | | .   '  /  | .    ' / | |  | '
- /  /`--'  / :  | : ;  ; |  '   : |: | '   :  '   '  : |__  |   | |  |/  '   ; |:  | '   ;   /| ;  : |
-'--'.     /  '  :  `--'   \ |   | '/ : |   |  |   |  | '.'| |   | |--'   |   | '/  ' '   |  / | |  , ;
-  `--'---'   :  ,      .-./ |   :    | |   :  \   ;  :    ; |   |/       |   :    :| |   :    |  ---'
-              `--`----'     /    \  /  |   | ,'   |  ,   /  '---'         \   \  /    \   \  /
-                            `-'----'   `----'      ---`-'                  `----'      `----'
+,-.----.                             ___
+\    /  \              ,-.----.    ,--.'|_
+;   :    \             \    /  \   |  | :,'   ,---.    __  ,-.
+|   | .\ :             |   :    |  :  : ' :  '   ,'\ ,' ,'/ /|
+.   : |: |   ,--.--.   |   | .\ :.;__,'  /  /   /   |'  | |' |
+|   |  \ :  /       \  .   : |: ||  |   |  .   ; ,. :|  |   ,'
+|   : .  / .--.  .-. | |   |  \ ::__,'| :  '   | |: :'  :  /
+;   | |  \  \__\/: . . |   : .  |  '  : |__'   | .; :|  | '
+|   | ;\  \ ," .--.; | :     |`-'  |  | '.'|   :    |;  : |
+:   ' | \.'/  /  ,.  | :   : :     ;  :    ;\   \  / |  , ;
+:   : :-' ;  :   .'   \|   | :     |  ,   /  `----'   ---'
+|   |.'   |  ,     .-./`---'.|      ---`-'
+`---'      `--`---'      `---`
 
-""" + colors.bcolors.ENDC + """SubFinder v""" + __version__ + ", by " + __author__)
+
+""" + colors.bcolors.ENDC + """Raptor v""" + __version__ + ", by " + __author__)
 
 def valid_domain(domain):
     #Valid Hostname
@@ -78,7 +79,7 @@ def main():
 
     global data_lists, threads
 
-    #print_header()
+    print_header()
 
     args = ARGS.parse_args()
     if not args.roots:
